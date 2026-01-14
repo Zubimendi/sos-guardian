@@ -1,20 +1,29 @@
 import React from "react";
-import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
-import {LinearGradient} from "expo-linear-gradient";
+import {View, Text, StyleSheet, TouchableOpacity, ScrollView} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {COLORS} from "../constants/colors";
 import Button from "../components/common/Button";
+import Screen from "../components/common/Screen";
 import {registerForPushNotificationsAsync} from "../services/notifications";
 import {requestLocationPermission} from "../services/location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useAuth} from "../context/AuthContext";
 
 type Props = NativeStackScreenProps<any>;
 
 const OnboardingScreen: React.FC<Props> = ({navigation}) => {
+  const {firebaseUser} = useAuth();
+
   const handleContinue = async () => {
     await AsyncStorage.setItem("hasOnboarded", "true");
-    navigation.replace("Auth");
+    // If user is already logged in, go straight to the main app,
+    // otherwise show the auth flow.
+    if (firebaseUser) {
+      navigation.replace("Main");
+    } else {
+      navigation.replace("Auth");
+    }
   };
 
   const handleEnableNotifications = async () => {
@@ -26,27 +35,51 @@ const OnboardingScreen: React.FC<Props> = ({navigation}) => {
   };
 
   const handleAddContact = () => {
-    navigation.navigate("AddContact");
+    // Require auth before adding contacts
+    if (firebaseUser) {
+      navigation.navigate("AddContact");
+    } else {
+      navigation.replace("Auth");
+    }
   };
 
   return (
-    <LinearGradient
-      colors={["#050816", "#0B1020", "#050816"]}
-      style={styles.gradient}
-    >
-      <View style={styles.container}>
+    <Screen>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{paddingBottom: 32}}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.logoRow}>
           <View style={styles.logoCircle}>
             <Ionicons name="shield-checkmark" size={32} color={COLORS.text} />
           </View>
-          <Text style={styles.appName}>SOS Guardian</Text>
+          <View>
+            <Text style={styles.appName}>SOS Guardian</Text>
+            <Text style={styles.appTagline}>Personal safety, one tap away.</Text>
+          </View>
         </View>
 
-        <Text style={styles.heading}>Your pocket safety companion</Text>
+        <Text style={styles.heading}>Feel safer getting home</Text>
         <Text style={styles.subheading}>
-          Set up SOS Guardian so trusted contacts can be notified instantly if
-          you feel unsafe.
+          Configure SOS Guardian in under a minute so your trusted contacts are ready
+          when you need them most.
         </Text>
+
+        <View style={styles.stepsRow}>
+          <View style={styles.stepPill}>
+            <Text style={styles.stepNumber}>1</Text>
+            <Text style={styles.stepText}>Enable alerts</Text>
+          </View>
+          <View style={styles.stepPill}>
+            <Text style={styles.stepNumber}>2</Text>
+            <Text style={styles.stepText}>Allow location</Text>
+          </View>
+          <View style={styles.stepPill}>
+            <Text style={styles.stepNumber}>3</Text>
+            <Text style={styles.stepText}>Add contacts</Text>
+          </View>
+        </View>
 
         <View style={styles.card}>
           <View style={styles.cardRow}>
@@ -88,29 +121,62 @@ const OnboardingScreen: React.FC<Props> = ({navigation}) => {
         </View>
 
         <View style={styles.actions}>
-          <Button title="Enable notifications" onPress={handleEnableNotifications} />
-          <Button title="Enable location" onPress={handleEnableLocation} />
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={handleEnableNotifications}
+          >
+            <View style={styles.actionIconCircle}>
+              <Ionicons
+                name="notifications-outline"
+                size={16}
+                color={COLORS.secondary}
+              />
+            </View>
+            <View style={{flex: 1}}>
+              <Text style={styles.actionTitle}>Enable notifications</Text>
+              <Text style={styles.actionText}>
+                So we can remind you about timers and SOS state.
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={handleEnableLocation}
+          >
+            <View style={styles.actionIconCircle}>
+              <Ionicons
+                name="location-outline"
+                size={16}
+                color={COLORS.secondary}
+              />
+            </View>
+            <View style={{flex: 1}}>
+              <Text style={styles.actionTitle}>Enable location</Text>
+              <Text style={styles.actionText}>
+                So your contacts receive accurate SOS locations.
+              </Text>
+            </View>
+          </TouchableOpacity>
+
           <TouchableOpacity onPress={handleAddContact}>
-            <Text style={styles.secondaryLink}>Add your first emergency contact</Text>
+            <Text style={styles.secondaryLink}>
+              Add your first emergency contact
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View style={{marginTop: 16}}>
-          <Button title="Continue" onPress={handleContinue} />
+          <Button title="Get started" onPress={handleContinue} />
         </View>
-      </View>
-    </LinearGradient>
+      </ScrollView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 64,
   },
   logoRow: {
     flexDirection: "row",
@@ -133,6 +199,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 12,
   },
+  appTagline: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginLeft: 12,
+    marginTop: 2,
+  },
   heading: {
     color: COLORS.text,
     fontSize: 24,
@@ -143,6 +215,31 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 14,
     marginBottom: 24,
+  },
+  stepsRow: {
+    flexDirection: "row",
+    marginBottom: 16,
+  },
+  stepPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginRight: 8,
+  },
+  stepNumber: {
+    color: COLORS.primary,
+    fontSize: 12,
+    fontWeight: "700",
+    marginRight: 4,
+  },
+  stepText: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
   },
   card: {
     backgroundColor: COLORS.card,
@@ -177,6 +274,36 @@ const styles = StyleSheet.create({
   },
   actions: {
     marginTop: 24,
+  },
+  actionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginBottom: 10,
+  },
+  actionIconCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  actionTitle: {
+    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  actionText: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    marginTop: 2,
   },
   secondaryLink: {
     color: COLORS.secondary,

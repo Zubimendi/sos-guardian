@@ -1,11 +1,13 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useCallback} from "react";
 import {View, Text, StyleSheet, FlatList} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
+import {useFocusEffect} from "@react-navigation/native";
 import {COLORS} from "../../constants/colors";
 import Button from "../../components/common/Button";
 import Screen from "../../components/common/Screen";
 import SectionHeader from "../../components/common/SectionHeader";
+import HeaderBar from "../../components/common/HeaderBar";
 import ContactCard from "../../components/contacts/ContactCard";
 import {EmergencyContact} from "../../types";
 import {useAuth} from "../../context/AuthContext";
@@ -26,9 +28,11 @@ const ContactsScreen: React.FC<Props> = ({navigation}) => {
     setContacts(data);
   };
 
-  useEffect(() => {
-    void loadContacts();
-  }, [firebaseUser]);
+  useFocusEffect(
+    useCallback(() => {
+      void loadContacts();
+    }, [firebaseUser]),
+  );
 
   const handleDelete = async (id: string) => {
     await deleteEmergencyContact(id);
@@ -38,6 +42,7 @@ const ContactsScreen: React.FC<Props> = ({navigation}) => {
   return (
     <Screen>
       <View style={styles.container}>
+        <HeaderBar style={{marginBottom: 12}} />
         <SectionHeader
           title="Emergency contacts"
           subtitle="People we notify when you trigger an SOS."

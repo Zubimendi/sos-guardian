@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {View, Text, StyleSheet, ScrollView} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import {COLORS} from "../../constants/colors";
@@ -6,6 +6,7 @@ import SOSButton from "../../components/emergency/SOSButton";
 import SafetyTimer from "../../components/emergency/SafetyTimer";
 import MapView from "../../components/map/MapView";
 import Screen from "../../components/common/Screen";
+import HeaderBar from "../../components/common/HeaderBar";
 import {useAuth} from "../../context/AuthContext";
 import {useAlert} from "../../context/AlertContext";
 import {getCurrentLocation} from "../../services/location";
@@ -18,6 +19,8 @@ const HomeScreen: React.FC = () => {
   const {activeAlertId, triggering, triggerSOS, resolveActiveAlert} =
     useAlert();
   const [location, setLocation] = useState<Location | null>(null);
+  const [timerRemaining, setTimerRemaining] = useState<number | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -56,11 +59,28 @@ const HomeScreen: React.FC = () => {
       "Confirm you’re safe or trigger SOS if you need help.",
       duration * 60,
     );
+
+    // Local countdown for UI
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    setTimerRemaining(duration * 60);
+    timerRef.current = setInterval(() => {
+      setTimerRemaining((prev) => {
+        if (prev === null) return prev;
+        if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
   };
 
   return (
     <Screen>
       <ScrollView contentContainerStyle={{paddingBottom: 32}}>
+        <HeaderBar style={{marginBottom: 16}} />
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.heading}>
@@ -84,7 +104,10 @@ const HomeScreen: React.FC = () => {
 
         <SOSButton onPress={handleSOS} active={!!activeAlertId || triggering} />
 
-        <SafetyTimer onStart={handleStartTimer} />
+        <SafetyTimer
+          onStart={handleStartTimer}
+          remainingSeconds={timerRemaining}
+        />
       </ScrollView>
     </Screen>
   );

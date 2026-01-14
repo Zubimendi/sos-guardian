@@ -5,6 +5,7 @@ import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {COLORS} from "../../constants/colors";
 import Card from "../../components/common/Card";
 import Screen from "../../components/common/Screen";
+import HeaderBar from "../../components/common/HeaderBar";
 import {Alert} from "../../types";
 import {useAuth} from "../../context/AuthContext";
 import {getUserAlerts, subscribeToUserActiveAlerts} from "../../services/database";
@@ -56,6 +57,7 @@ const AlertHistoryScreen: React.FC<Props> = () => {
   return (
     <Screen>
       <View style={styles.container}>
+        <HeaderBar style={{marginBottom: 12}} />
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.title}>Alert history</Text>

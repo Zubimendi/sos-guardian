@@ -34,7 +34,6 @@ export const getUserContacts = async (
   const q = query(
     collection(db, COLLECTIONS.CONTACTS),
     where("userId", "==", userId),
-    orderBy("priority", "asc"),
   );
   const snap = await getDocs(q);
   return snap.docs.map(

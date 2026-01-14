@@ -80,11 +80,10 @@ const AppNavigator = () => {
   return (
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{headerShown: false}}>
-        {!firebaseUser && !hasOnboarded && (
-          <RootStack.Screen name="Onboarding" component={OnboardingScreen} />
-        )}
         {firebaseUser ? (
           <RootStack.Screen name="Main" component={MainTabs} />
+        ) : hasOnboarded === false ? (
+          <RootStack.Screen name="Onboarding" component={OnboardingScreen} />
         ) : (
           <RootStack.Screen name="Auth" component={AuthNavigator} />
         )}

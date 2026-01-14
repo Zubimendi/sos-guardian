@@ -7,11 +7,13 @@ import {APP_CONFIG} from "../../constants/config";
 interface Props {
   durationMinutes?: number;
   onStart: (duration: number) => void;
+  remainingSeconds?: number | null;
 }
 
 const SafetyTimer: React.FC<Props> = ({
   durationMinutes = APP_CONFIG.DEFAULT_SAFETY_TIMER,
   onStart,
+  remainingSeconds,
 }) => {
   const [selected, setSelected] = useState<number>(durationMinutes);
 
@@ -48,6 +50,12 @@ const SafetyTimer: React.FC<Props> = ({
           </TouchableOpacity>
         ))}
       </View>
+      {typeof remainingSeconds === "number" && remainingSeconds > 0 && (
+        <Text style={styles.timerText}>
+          Timer running:{" "}
+          {`${Math.floor(remainingSeconds / 60)}:${`${remainingSeconds % 60}`.padStart(2, "0")}`}
+        </Text>
+      )}
       <Button
         title={`Start ${selected} min timer`}
         onPress={() => onStart(selected)}
@@ -70,6 +78,11 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 13,
     marginBottom: 8,
+  },
+  timerText: {
+    color: COLORS.text,
+    fontSize: 13,
+    marginBottom: 4,
   },
   pillRow: {
     flexDirection: "row",

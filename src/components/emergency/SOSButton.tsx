@@ -60,11 +60,11 @@ const SOSButton: React.FC<Props> = ({onPress, active}) => {
 const styles = StyleSheet.create({
   wrapper: {
     alignSelf: "center",
-    marginVertical: 24,
+    marginVertical: 28,
   },
   button: {
-    width: 200,
-    height: 200,
+    width: 220,
+    height: 220,
     borderRadius: 100,
     alignItems: "center",
     justifyContent: "center",
@@ -97,6 +97,8 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 12,
     marginTop: 4,
+    maxWidth: 180,
+    textAlign: "center",
   },
 });
 

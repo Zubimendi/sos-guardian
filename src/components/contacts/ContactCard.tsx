@@ -1,5 +1,6 @@
 import React from "react";
-import {View, Text, StyleSheet} from "react-native";
+import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
+import {Ionicons} from "@expo/vector-icons";
 import {COLORS} from "../../constants/colors";
 import Card from "../common/Card";
 import Button from "../common/Button";
@@ -20,9 +21,15 @@ const ContactCard: React.FC<Props> = ({contact, onDelete}) => {
           <Text style={styles.meta}>{contact.phone}</Text>
         </View>
         {onDelete ? (
-          <View style={styles.actions}>
-            <Button title="Remove" onPress={onDelete} />
-          </View>
+          <TouchableOpacity style={styles.removePill} onPress={onDelete}>
+            <Ionicons
+              name="trash-outline"
+              size={16}
+              color={COLORS.textSecondary}
+              style={{marginRight: 4}}
+            />
+            <Text style={styles.removeText}>Remove</Text>
+          </TouchableOpacity>
         ) : null}
       </View>
     </Card>
@@ -46,6 +53,20 @@ const styles = StyleSheet.create({
   },
   actions: {
     marginLeft: 12,
+  },
+  removePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: "rgba(255,255,255,0.02)",
+  },
+  removeText: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
   },
 });
 
