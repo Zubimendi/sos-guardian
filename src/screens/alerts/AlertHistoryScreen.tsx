@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from "react";
 import {View, Text, StyleSheet, FlatList} from "react-native";
-import {LinearGradient} from "expo-linear-gradient";
 import {Ionicons} from "@expo/vector-icons";
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {COLORS} from "../../constants/colors";
 import Card from "../../components/common/Card";
+import Screen from "../../components/common/Screen";
 import {Alert} from "../../types";
 import {useAuth} from "../../context/AuthContext";
-import {getUserAlerts} from "../../services/database";
+import {getUserAlerts, subscribeToUserActiveAlerts} from "../../services/database";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -34,6 +34,7 @@ const statusColor: Record<Alert["status"], string> = {
 const AlertHistoryScreen: React.FC<Props> = () => {
   const {firebaseUser} = useAuth();
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [activeAlerts, setActiveAlerts] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -43,11 +44,17 @@ const AlertHistoryScreen: React.FC<Props> = () => {
     })();
   }, [firebaseUser]);
 
+  useEffect(() => {
+    if (!firebaseUser) return;
+    const unsubscribe = subscribeToUserActiveAlerts(
+      firebaseUser.uid,
+      (current) => setActiveAlerts(current),
+    );
+    return () => unsubscribe();
+  }, [firebaseUser]);
+
   return (
-    <LinearGradient
-      colors={["#040613", "#060818", "#050509"]}
-      style={styles.gradient}
-    >
+    <Screen>
       <View style={styles.container}>
         <View style={styles.headerRow}>
           <View>
@@ -60,6 +67,26 @@ const AlertHistoryScreen: React.FC<Props> = () => {
             <Ionicons name="alert-circle" size={22} color={COLORS.text} />
           </View>
         </View>
+
+        {activeAlerts.length > 0 && (
+          <Card>
+            <View style={styles.activeRow}>
+              <Ionicons
+                name="flash"
+                size={18}
+                color={COLORS.warning}
+                style={{marginRight: 8}}
+              />
+              <View style={{flex: 1}}>
+                <Text style={styles.activeTitle}>Active alert</Text>
+                <Text style={styles.activeMeta}>
+                  Live SOS in progress. Last update at{" "}
+                  {formatDateTime(activeAlerts[0].timestamp)}
+                </Text>
+              </View>
+            </View>
+          </Card>
+        )}
 
         <FlatList
           data={alerts}
@@ -101,19 +128,13 @@ const AlertHistoryScreen: React.FC<Props> = () => {
           contentContainerStyle={{paddingBottom: 40}}
         />
       </View>
-    </LinearGradient>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
   container: {
     flex: 1,
-    backgroundColor: "transparent",
-    paddingHorizontal: 16,
-    paddingTop: 40,
   },
   headerRow: {
     flexDirection: "row",
@@ -165,6 +186,20 @@ const styles = StyleSheet.create({
   empty: {
     color: COLORS.textSecondary,
     marginTop: 24,
+  },
+  activeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  activeTitle: {
+    color: COLORS.warning,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  activeMeta: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
   },
 });
 

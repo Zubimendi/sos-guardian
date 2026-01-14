@@ -43,7 +43,14 @@ const HomeScreen: React.FC = () => {
       duration,
     });
 
-    // Local reminder when timer is about to end
+    // Mid-way check-in
+    await scheduleLocalNotification(
+      "Safety check-in",
+      "Tap to confirm you’re safe. If not, use SOS.",
+      (duration * 60) / 2,
+    );
+
+    // Final reminder when timer ends
     await scheduleLocalNotification(
       "Safety timer ending",
       "Confirm you’re safe or trigger SOS if you need help.",

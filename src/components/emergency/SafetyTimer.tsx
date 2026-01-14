@@ -1,5 +1,5 @@
-import React from "react";
-import {View, Text, StyleSheet} from "react-native";
+import React, {useState} from "react";
+import {View, Text, StyleSheet, TouchableOpacity} from "react-native";
 import {COLORS} from "../../constants/colors";
 import Button from "../common/Button";
 import {APP_CONFIG} from "../../constants/config";
@@ -13,6 +13,13 @@ const SafetyTimer: React.FC<Props> = ({
   durationMinutes = APP_CONFIG.DEFAULT_SAFETY_TIMER,
   onStart,
 }) => {
+  const [selected, setSelected] = useState<number>(durationMinutes);
+
+  const presets =
+    APP_CONFIG.SAFETY_TIMER_OPTIONS && APP_CONFIG.SAFETY_TIMER_OPTIONS.length
+      ? APP_CONFIG.SAFETY_TIMER_OPTIONS
+      : [15, 30, 45, 60];
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Safety Timer</Text>
@@ -20,9 +27,30 @@ const SafetyTimer: React.FC<Props> = ({
         Start a countdown so we check in if you don&apos;t confirm you&apos;re
         safe.
       </Text>
+      <View style={styles.pillRow}>
+        {presets.map((m) => (
+          <TouchableOpacity
+            key={m}
+            style={[
+              styles.pill,
+              selected === m && styles.pillSelected,
+            ]}
+            onPress={() => setSelected(m)}
+          >
+            <Text
+              style={[
+                styles.pillText,
+                selected === m && styles.pillTextSelected,
+              ]}
+            >
+              {m} min
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
       <Button
-        title={`Start ${durationMinutes} min timer`}
-        onPress={() => onStart(durationMinutes)}
+        title={`Start ${selected} min timer`}
+        onPress={() => onStart(selected)}
       />
     </View>
   );
@@ -42,6 +70,32 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 13,
     marginBottom: 8,
+  },
+  pillRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginBottom: 8,
+  },
+  pill: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginRight: 6,
+    marginBottom: 6,
+  },
+  pillSelected: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  pillText: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+  },
+  pillTextSelected: {
+    color: COLORS.text,
+    fontWeight: "600",
   },
 });
 

@@ -15,6 +15,8 @@ import {
   push,
   query as rQuery,
   orderByChild,
+  onValue,
+  equalTo,
 } from "firebase/database";
 import {db, rtdb} from "./firebase";
 import {
@@ -149,5 +151,27 @@ export const getActiveAlertsRef = () => {
     ref(rtdb, RT_PATHS.ACTIVE_ALERTS),
     orderByChild("timestamp"),
   );
+};
+
+export const subscribeToUserActiveAlerts = (
+  userId: string,
+  callback: (alerts: any[]) => void,
+) => {
+  const q = rQuery(
+    ref(rtdb, RT_PATHS.ACTIVE_ALERTS),
+    orderByChild("userId"),
+    equalTo(userId),
+  );
+
+  const unsubscribe = onValue(q, (snapshot) => {
+    const value = snapshot.val() || {};
+    const alerts = Object.keys(value).map((key) => ({
+      id: key,
+      ...value[key],
+    }));
+    callback(alerts);
+  });
+
+  return () => unsubscribe();
 };
 
