@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {View, Text, StyleSheet, FlatList} from "react-native";
+import {View, Text, StyleSheet, FlatList, TouchableOpacity} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {COLORS} from "../../constants/colors";
@@ -11,6 +11,8 @@ import {useAuth} from "../../context/AuthContext";
 import {getUserAlerts, subscribeToUserActiveAlerts} from "../../services/database";
 
 type Props = NativeStackScreenProps<any>;
+
+const AlertHistoryScreen: React.FC<Props> = ({navigation}) => {
 
 const formatDateTime = (timestamp: number) => {
   const d = new Date(timestamp);
@@ -32,7 +34,6 @@ const statusColor: Record<Alert["status"], string> = {
   false_alarm: "#98989D",
 };
 
-const AlertHistoryScreen: React.FC<Props> = () => {
   const {firebaseUser} = useAuth();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [activeAlerts, setActiveAlerts] = useState<any[]>([]);
@@ -65,8 +66,16 @@ const AlertHistoryScreen: React.FC<Props> = () => {
               Overview of your past SOS and timer alerts.
             </Text>
           </View>
-          <View style={styles.iconCircle}>
-            <Ionicons name="alert-circle" size={22} color={COLORS.text} />
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("SmsLogs")}
+              style={styles.smsLogsButton}>
+              <Ionicons name="mail-outline" size={18} color={COLORS.primary} />
+              <Text style={styles.smsLogsText}>SMS Logs</Text>
+            </TouchableOpacity>
+            <View style={styles.iconCircle}>
+              <Ionicons name="alert-circle" size={22} color={COLORS.text} />
+            </View>
           </View>
         </View>
 
@@ -153,6 +162,27 @@ const styles = StyleSheet.create({
   subtitle: {
     color: COLORS.textSecondary,
     fontSize: 14,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  smsLogsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: COLORS.surface,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  smsLogsText: {
+    color: COLORS.primary,
+    fontSize: 12,
+    fontWeight: "600",
   },
   iconCircle: {
     width: 40,

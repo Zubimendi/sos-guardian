@@ -11,6 +11,7 @@ export interface User {
   createdAt: number;
   updatedAt: number;
   settings: UserSettings;
+  pushToken?: string; // Expo push notification token
 }
 
 export interface UserSettings {

@@ -5,7 +5,7 @@ export const APP_CONFIG = {
   DEFAULT_SAFETY_TIMER: 30,
   SAFETY_TIMER_OPTIONS: [15, 30, 45, 60, 90, 120],
   LOCATION_UPDATE_INTERVAL: 5000,
-  FUNCTIONS_BASE_URL: "https://us-central1-YOUR_PROJECT_ID.cloudfunctions.net",
+  FUNCTIONS_BASE_URL: "https://us-central1-sos-guardian-6b650.cloudfunctions.net",
   OPENCAGE_API_KEY: "YOUR_OPENCAGE_API_KEY",
 } as const;
 

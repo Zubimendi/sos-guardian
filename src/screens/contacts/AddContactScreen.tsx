@@ -7,6 +7,7 @@ import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 import {useAuth} from "../../context/AuthContext";
 import {addEmergencyContact} from "../../services/database";
+import {notifyContactAdded} from "../../services/pushNotifications";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -56,6 +57,18 @@ const AddContactScreen: React.FC<Props> = ({navigation}) => {
         priority: 1,
         verified: false,
       } as any);
+
+      // Notify the contact if they're a user
+      try {
+        await notifyContactAdded(
+          result.data.phone,
+          firebaseUser.displayName || "Someone",
+        );
+      } catch (notifError) {
+        // Don't fail the whole operation if notification fails
+        console.log("Could not notify contact:", notifError);
+      }
+
       navigation.goBack();
     } catch (e: any) {
       setError(e?.message || "Failed to save contact");

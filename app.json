@@ -12,18 +12,66 @@
       "resizeMode": "contain",
       "backgroundColor": "#050816"
     },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FF3B30",
+          "sounds": [
+            "default"
+          ]
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow SOS Guardian to access your location even when the app is in the background for emergency alerts."
+        }
+      ]
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sosguardian.app",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "location",
+          "remote-notification"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#050816"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.sosguardian.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "notification": {
+      "icon": "./assets/icon.png",
+      "color": "#FF3B30",
+      "iosDisplayInForeground": true,
+      "androidMode": "default",
+      "androidCollapsedTitle": "SOS Guardian Alert"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d8f92c4f-cf40-4cc2-95c8-d54cf06a5cca"
+      }
+    },
+    "owner": "0xkali"
   }
 }

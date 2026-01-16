@@ -13,6 +13,7 @@ import HomeScreen from "../screens/home/HomeScreen";
 import ContactsScreen from "../screens/contacts/ContactsScreen";
 import AddContactScreen from "../screens/contacts/AddContactScreen";
 import AlertHistoryScreen from "../screens/alerts/AlertHistoryScreen";
+import SmsLogsScreen from "../screens/alerts/SmsLogsScreen";
 import SettingsScreen from "../screens/settings/SettingsScreen";
 import {COLORS} from "../constants/colors";
 
@@ -91,6 +92,11 @@ const AppNavigator = () => {
           name="AddContact"
           component={AddContactScreen}
           options={{presentation: "modal"}}
+        />
+        <RootStack.Screen
+          name="SmsLogs"
+          component={SmsLogsScreen}
+          options={{presentation: "card", title: "SMS Logs"}}
         />
       </RootStack.Navigator>
     </NavigationContainer>

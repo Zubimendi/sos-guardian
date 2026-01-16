@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import {auth, db} from "./firebase";
 import {COLLECTIONS, User} from "../types";
+import {registerForPushNotificationsAsync} from "./notifications";
 
 export const listenToAuthChanges = (
   callback: (user: FirebaseUser | null) => void,
@@ -32,6 +33,9 @@ export const signUpWithEmail = async (
   const fbUser = cred.user;
 
   await updateProfile(fbUser, {displayName: name});
+
+  // Register for push notifications
+  const pushToken = await registerForPushNotificationsAsync();
 
   const userDocRef = doc(db, COLLECTIONS.USERS, fbUser.uid);
   const now = Date.now();
@@ -55,6 +59,7 @@ export const signUpWithEmail = async (
       notificationSound: true,
       vibration: true,
     },
+    pushToken: pushToken || undefined,
   };
 
   await setDoc(userDocRef, {
@@ -71,7 +76,26 @@ export const signInWithEmail = async (
   password: string,
 ): Promise<FirebaseUser> => {
   const cred = await signInWithEmailAndPassword(auth, email, password);
+  
+  // Update push token on login
+  const pushToken = await registerForPushNotificationsAsync();
+  if (pushToken) {
+    const userDocRef = doc(db, COLLECTIONS.USERS, cred.user.uid);
+    await updateDoc(userDocRef, {
+      pushToken,
+      updatedAt: serverTimestamp(),
+    });
+  }
+  
   return cred.user;
+};
+
+export const updateUserPushToken = async (userId: string, pushToken: string) => {
+  const userDocRef = doc(db, COLLECTIONS.USERS, userId);
+  await updateDoc(userDocRef, {
+    pushToken,
+    updatedAt: serverTimestamp(),
+  });
 };
 
 export const signOutUser = async () => {

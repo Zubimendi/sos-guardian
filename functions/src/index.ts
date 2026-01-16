@@ -9,7 +9,7 @@
 
 import {setGlobalOptions} from "firebase-functions";
 import {onRequest} from "firebase-functions/https";
-import * as functions from "firebase-functions";
+import {defineString} from "firebase-functions/params";
 import * as logger from "firebase-functions/logger";
 import twilio from "twilio";
 
@@ -26,13 +26,16 @@ import twilio from "twilio";
 // functions should each use functions.runWith({ maxInstances: 10 }) instead.
 // In the v1 API, each function can only serve one request per container, so
 // this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+setGlobalOptions({maxInstances: 10});
 
-const twilioConfig = functions.config().twilio || {};
+// Define Twilio configuration parameters using the new params API
+const twilioAccountSid = defineString("TWILIO_ACCOUNT_SID");
+const twilioAuthToken = defineString("TWILIO_AUTH_TOKEN");
+const twilioPhoneNumber = defineString("TWILIO_PHONE_NUMBER");
 
 const twilioClient = twilio(
-  twilioConfig.account_sid,
-  twilioConfig.auth_token,
+  twilioAccountSid.value(),
+  twilioAuthToken.value(),
 );
 
 export const sendAlertSms = onRequest(async (req, res) => {
@@ -58,25 +61,28 @@ export const sendAlertSms = onRequest(async (req, res) => {
     return;
   }
 
-  if (!twilioConfig.phone_number) {
+  const phoneNumber = twilioPhoneNumber.value();
+  if (!phoneNumber) {
     res.status(500).json({error: "Twilio phone number is not configured"});
     return;
   }
 
   try {
     const result = await twilioClient.messages.create({
-      from: twilioConfig.phone_number,
+      from: phoneNumber,
       to,
       body: message,
     });
 
     logger.info("SMS sent", {sid: result.sid, to});
     res.status(200).json({success: true, sid: result.sid});
-  } catch (error: any) {
-    logger.error("Failed to send SMS", {error: error?.message, to});
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to send SMS";
+    logger.error("Failed to send SMS", {error: errorMessage, to});
     res.status(500).json({
       success: false,
-      error: error?.message || "Failed to send SMS",
+      error: errorMessage,
     });
   }
 });
